@@ -13,9 +13,9 @@ outputs:
     description: "version tag"
     value: ${{ steps.version.outputs.version_tag }}
 
-  version_tag_no_v:
-    description: "version tag with the v"
-    value: ${{ steps.version.outputs.version_tag_no_v }}
+  version_tag_numeric:
+    description: "version tag with only numeric or ."
+    value: ${{ steps.version.outputs.version_tag_numeric }}
 
 runs:
   using: "composite"

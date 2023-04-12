@@ -82,6 +82,8 @@ GITHUB_OUTPUT=${GITHUB_OUTPUT:-/tmp/$NAME.$USER}
 # main
 #
 
+
+
 if [[ "$tag" != 'next_tag' ]];then
   echo "tag specified: $tag"
   echo "version_tag=${tag}" >> "$GITHUB_OUTPUT" 2>/dev/null
