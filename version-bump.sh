@@ -147,6 +147,7 @@ echo "Updating $version to $new_tag"
 
 # get current hash and see if it already has a tag
 git_commit=`git rev-parse HEAD`
+echo "git_commit=$git_commit"
 
 # only tag if no tag already (would be better if the git describe command above could have a silent option)
 if $(git describe --contains $git_commit); then

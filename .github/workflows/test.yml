@@ -1,31 +1,7 @@
 name: test
 
 on:
-  workflow_call:
-    inputs:
-      artifact_name:
-        description: 'Name of the artifact to build'
-        required: false
-        default: "orcid-message-listener"
-        type: string
-      version_tag:
-        description: 'Name of the tag to build'
-        required: false
-        default: "v2.0.1"
-        type: string
-
-  workflow_dispatch:
-    inputs:
-      artifact_name:
-        description: 'Name of the artifact to build'
-        required: false
-        default: "orcid-message-listener"
-        type: string
-      version_tag:
-        description: 'Name of the tag to build'
-        required: false
-        default: "v2.0.1"
-        type: string
+  push:
 
 jobs:
   test:
@@ -42,19 +18,13 @@ jobs:
           git diff
           ls -la .
 
-      - name: find next version
+      - name: keep version as it has been manually provided
         id: version
         uses: ORCID/version-bump-action@main
         with:
-          version_tag: ${{ inputs.version_tag }}
+          version_tag: v2.0.1
 
-#       - name: bump version
-#         id: version
-#         run: |
-#           ./version-bump.sh --tag ${{ inputs.version_tag }}
-#         shell: bash
-# 
-      - name: test if bumping vars are right
+      - name: test if keeping vars are right
         run: |
           if [[ "$version_tag_numeric" == '2.0.1' ]];then
             echo "winning"
@@ -66,3 +36,26 @@ jobs:
         env:
           version_tag_numeric: ${{ steps.version.outputs.version_tag_numeric }}
           version_tag: ${{ steps.version.outputs.version_tag }}
+
+      - name: find next version by bumping tag
+        id: version_bumped
+        uses: ORCID-dev/version-bump-action@main
+        with:
+          version_tag: next_tag
+
+      - name: test if bumping vars are right
+        run: |
+          if [[ "$version_tag_numeric" == '0.0.2' ]];then
+            echo "winning"
+          else
+            exit 1
+          fi
+
+        shell: bash
+        env:
+          version_tag_numeric: ${{ steps.version_bumped.outputs.version_tag_numeric }}
+          version_tag: ${{ steps.version_bumped.outputs.version_tag }}
+
+
+
+
