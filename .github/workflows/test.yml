@@ -1,0 +1,68 @@
+name: test
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: 'Name of the artifact to build'
+        required: false
+        default: "orcid-message-listener"
+        type: string
+      version_tag:
+        description: 'Name of the tag to build'
+        required: false
+        default: "v2.0.1"
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      artifact_name:
+        description: 'Name of the artifact to build'
+        required: false
+        default: "orcid-message-listener"
+        type: string
+      version_tag:
+        description: 'Name of the tag to build'
+        required: false
+        default: "v2.0.1"
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: check some build related things
+        run: |
+          git --version
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git status
+          git diff
+          ls -la .
+
+      - name: find next version
+        id: version
+        uses: ORCID/version-bump-action@main
+        with:
+          version_tag: ${{ inputs.version_tag }}
+
+#       - name: bump version
+#         id: version
+#         run: |
+#           ./version-bump.sh --tag ${{ inputs.version_tag }}
+#         shell: bash
+# 
+      - name: test if bumping vars are right
+        run: |
+          if [[ "$version_tag_numeric" == '2.0.1' ]];then
+            echo "winning"
+          else
+            exit 1
+          fi
+
+        shell: bash
+        env:
+          version_tag_numeric: ${{ steps.version.outputs.version_tag_numeric }}
+          version_tag: ${{ steps.version.outputs.version_tag }}
