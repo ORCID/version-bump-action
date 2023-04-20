@@ -15,11 +15,12 @@ trap 'echo "exit_code $? line $LINENO linecallfunc $BASH_COMMAND"' ERR
 prefix_search_arg="v"
 prefix='v'
 do_tag=0
-tag=${GHA_TAG:-next_tag}
+tag=${GHA_TAG:-latest}
 USER=$(whoami)
-bump=git_log
+bump=${GHA_BUMP:-gitlog}
 major=0
 minor=0
+patch=0
 
 #
 # functions
@@ -81,10 +82,10 @@ GITHUB_OUTPUT=${GITHUB_OUTPUT:-/tmp/$NAME.$USER}
 #
 # main
 #
+#set -x
 
-
-
-if [[ "$tag" != 'next_tag' ]];then
+# option that just returns the provided values
+if [[ "$bump" = 'gitlog' ]] && [[ "$tag" != 'latest' ]];then
   echo "tag specified: $tag"
   echo "version_tag=${tag}" >> "$GITHUB_OUTPUT" 2>/dev/null
   tag_numeric="$(echo $tag | tr -dc '[:digit:].')"
@@ -107,24 +108,62 @@ vnum2=${version_bits[1]}
 vnum3=${version_bits[2]}
 vnum1=`echo $vnum1 | sed 's/v//'`
 
-if [[ "$bump" = 'git_log' ]];then
-  # Check for #major or #minor in commit message and increment the relevant version number
-  if git log --format=%B -n 1 HEAD | grep -q '#major';then
+# Allow git commit messages to override bump value
+# Check for #major or #minor in commit message and increment the relevant version number
+if [[ "$bump" = 'gitlog' ]];then
+
+  latest_log=$(git log --format=%B -n 1 HEAD)
+  merge_commit=$(echo "$latest_log" | head -n1)
+
+  echo "latest_log:"
+  echo "$latest_log"
+
+  echo "merge_commit:"
+  echo "$merge_commit"
+
+  if grep -qE 'feat' <<< $(echo $merge_commit);then
+    echo "feature git commit detected"
+    minor=1
+  fi
+
+  if grep -qE 'fix|bug|patch|test' <<< $(echo $merge_commit);then
+    echo "fix|bug|patch|test git commit detected"
+    patch=1
+  fi
+
+  if grep -q '#major' <<< $(echo $latest_log) ;then
     echo "major git commit detected"
     major=1
   fi
-  if git log --format=%B -n 1 HEAD | grep '#minor';then
+  if grep -q '#minor' <<< $(echo $latest_log) ;then
     echo "minor git commit detected"
     minor=1
   fi
-else
-  if [[ "$bump" = 'major' ]];then
-    major=1
+  if grep -q '#patch' <<< $(echo $latest_log) ;then
+    echo "patch git commit detected"
+    patch=1
   fi
-  if [[ "$bump" = 'minor' ]];then
-    minor=1
-  fi
+
 fi
+
+# take bumping from arguments
+
+if [[ "$bump" = 'major' ]];then
+  major=1
+fi
+if [[ "$bump" = 'minor' ]];then
+  minor=1
+fi
+if [[ "$bump" = 'patch' ]];then
+  patch=1
+fi
+
+
+
+
+#
+# perform version bumping
+#
 
 if [[ "$major" -eq 1 ]]; then
     echo "Update major version"
@@ -135,7 +174,7 @@ elif [[ "$minor" -eq 1 ]]; then
     echo "Update minor version"
     vnum2=$((vnum2+1))
     vnum3=0
-else
+elif [[ "$patch" -eq 1 ]]; then
     echo "Update patch version"
     vnum3=$((vnum3+1))
 fi
@@ -147,6 +186,7 @@ echo "Updating $version to $new_tag"
 
 # get current hash and see if it already has a tag
 git_commit=`git rev-parse HEAD`
+
 echo "git_commit=$git_commit"
 
 # only tag if no tag already (would be better if the git describe command above could have a silent option)

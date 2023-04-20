@@ -5,8 +5,15 @@ inputs:
   version_tag:
     description: 'version tag to use'
     required: false
-    default: "next_tag"
+    default: "latest"
     type: string
+  bump:
+    description: 'bump setting'
+    required: false
+    default: "gitlog"
+    type: string
+
+
 
 outputs:
   version_tag:
@@ -30,4 +37,5 @@ runs:
       # handle when empty input is provided
       env:
         GHA_TAG: ${{ inputs.version_tag }}
+        GHA_BUMP: ${{ inputs.bump }}
 
