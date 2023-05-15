@@ -246,6 +246,10 @@ fi
 
 new_tag_numeric="$(echo $new_tag | tr -dc '[:digit:].')"
 
+
+echo "version_last=${version}" >> "$GITHUB_OUTPUT" 2>/dev/null
+echo "version_last_numeric=${version_numeric}" >> "$GITHUB_OUTPUT" 2>/dev/null
+
 echo "version_tag=${new_tag}" >> "$GITHUB_OUTPUT" 2>/dev/null
 echo "version_tag_numeric=${new_tag_numeric}" >> "$GITHUB_OUTPUT" 2>/dev/null
 
