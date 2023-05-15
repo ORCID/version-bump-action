@@ -38,6 +38,26 @@ jobs:
           version_tag_numeric: ${{ steps.version.outputs.version_tag_numeric }}
           version_tag: ${{ steps.version.outputs.version_tag }}
 
+##########################################################################################
+
+      - name: specifically set a tag of v2.0.1 but check that the last version is 0.0.1
+        id: version_last
+        run: ./version-bump.sh
+        env:
+          GHA_TAG: v2.0.1
+
+      - name: test to see if the exact tag is returned
+        run: |
+          if [[ "$version_last_numeric" == '0.0.1' ]];then
+            echo "winning"
+          else
+            exit 1
+          fi
+        shell: bash
+        env:
+          version_last_numeric: ${{ steps.version_last.outputs.version_last_numeric }}
+          version_last: ${{ steps.version_last.outputs.version_last }}
+
 ###########################################################################################
       - name: test to see if default patch bumping from the latest git tag of 0.0.1 works
         id: version_bumped
@@ -56,27 +76,6 @@ jobs:
         env:
           version_tag_numeric: ${{ steps.version_bumped.outputs.version_tag_numeric }}
           version_tag: ${{ steps.version_bumped.outputs.version_tag }}
-
-###########################################################################################
-      - name: test to see if default patch bumping from the latest git tag of 0.0.1 works
-        id: version_bumped
-        run: ./version-bump.sh
-        env:
-          GHA_TAG: latest
-
-      - name: test if 0.0.1 is bumped to 0.0.2
-        run: |
-          if [[ "$version_tag_numeric" == '0.0.2' ]];then
-            echo "winning"
-          else
-            exit 1
-          fi
-        shell: bash
-        env:
-          version_tag_numeric: ${{ steps.version_bumped.outputs.version_tag_numeric }}
-          version_tag: ${{ steps.version_bumped.outputs.version_tag }}
-
-
 
 ###########################################################################################
 
