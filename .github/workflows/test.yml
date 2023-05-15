@@ -37,6 +37,27 @@ jobs:
           version_tag_numeric: ${{ steps.version.outputs.version_tag_numeric }}
           version_tag: ${{ steps.version.outputs.version_tag }}
 
+##########################################################################################
+
+      - name: specifically set a tag of v2.0.1 but check that the last version is 0.0.1
+        id: version
+        run: ./version-bump.sh
+        env:
+          GHA_TAG: v2.0.1
+
+      - name: test to see if the exact tag is returned
+        run: |
+          if [[ "$version_last_numeric" == '0.0.1' ]];then
+            echo "winning"
+          else
+            exit 1
+          fi
+        shell: bash
+        env:
+          version_tag_numeric: ${{ steps.version.outputs.version_last_numeric }}
+          version_tag: ${{ steps.version.outputs.version_last }}
+
+
 
 ###########################################################################################
       - name: test to see if default patch bumping from the latest git tag of 0.0.1 works

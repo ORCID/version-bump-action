@@ -92,9 +92,21 @@ GITHUB_OUTPUT=${GITHUB_OUTPUT:-/tmp/$NAME.$USER}
 #
 #set -x
 
+# parse the current version
+echo "git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags origin '*.*.*' | grep \"$prefix_search_arg\" | tail -n1 | cut -d '/' -f 3"
+version=`git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags origin '*.*.*' | grep "$prefix_search_arg" | tail -n1 | cut -d '/' -f 3`
+version_numeric="$(echo $version | tr -dc '[:digit:].')"
+
+echo "version: $version"
+echo "version_numeric: $version_numeric"
+
 # option that just returns the provided values
 if [[ "$tag" != 'latest' ]];then
   echo "tag specified: $tag"
+
+  echo "version_last=${version}" >> "$GITHUB_OUTPUT" 2>/dev/null
+  echo "version_last_numeric=${version_numeric}" >> "$GITHUB_OUTPUT" 2>/dev/null
+
   echo "version_tag=${tag}" >> "$GITHUB_OUTPUT" 2>/dev/null
   tag_numeric="$(echo $tag | tr -dc '[:digit:].')"
   echo "tag numeric: $tag_numeric"
@@ -102,19 +114,14 @@ if [[ "$tag" != 'latest' ]];then
   exit
 fi
 
-echo "git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags origin '*.*.*' | grep \"$prefix_search_arg\" | tail -n1 | cut -d '/' -f 3"
-version=`git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags origin '*.*.*' | grep "$prefix_search_arg" | tail -n1 | cut -d '/' -f 3`
-
-echo "version:$version"
-
 # replace . with space so can split into an array
-version_bits=(${version//./ })
+
+version_bits=(${version_numeric//./ })
 
 # get number parts and increase last one by 1
 vnum1=${version_bits[0]}
 vnum2=${version_bits[1]}
 vnum3=${version_bits[2]}
-vnum1=`echo $vnum1 | sed 's/v//'`
 
 # take bumping from arguments
 
@@ -215,6 +222,9 @@ else
 fi
 
 new_tag_numeric="$(echo $new_tag | tr -dc '[:digit:].')"
+
+echo "version_last=${version}" >> "$GITHUB_OUTPUT" 2>/dev/null
+echo "version_last_numeric=${version_numeric}" >> "$GITHUB_OUTPUT" 2>/dev/null
 
 echo "version_tag=${new_tag}" >> "$GITHUB_OUTPUT" 2>/dev/null
 echo "version_tag_numeric=${new_tag_numeric}" >> "$GITHUB_OUTPUT" 2>/dev/null

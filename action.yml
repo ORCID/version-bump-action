@@ -16,6 +16,14 @@ inputs:
 
 
 outputs:
+  version_last:
+    description: "last version in the git log"
+    value: ${{ steps.version.outputs.version_last }}
+
+  version_last_numeric:
+    description: "last version in the git log with only numeric or ."
+    value: ${{ steps.version.outputs.version_last_numeric }}
+
   version_tag:
     description: "version tag"
     value: ${{ steps.version.outputs.version_tag }}
