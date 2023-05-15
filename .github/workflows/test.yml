@@ -54,8 +54,8 @@ jobs:
           fi
         shell: bash
         env:
-          version_tag_numeric: ${{ steps.version_last.outputs.version_last_numeric }}
-          version_tag: ${{ steps.version_last.outputs.version_last }}
+          version_last_numeric: ${{ steps.version_last.outputs.version_last_numeric }}
+          version_last: ${{ steps.version_last.outputs.version_last }}
 
 
 
