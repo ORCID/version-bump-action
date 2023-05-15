@@ -40,7 +40,7 @@ jobs:
 ##########################################################################################
 
       - name: specifically set a tag of v2.0.1 but check that the last version is 0.0.1
-        id: version
+        id: version_last
         run: ./version-bump.sh
         env:
           GHA_TAG: v2.0.1
@@ -54,8 +54,8 @@ jobs:
           fi
         shell: bash
         env:
-          version_tag_numeric: ${{ steps.version.outputs.version_last_numeric }}
-          version_tag: ${{ steps.version.outputs.version_last }}
+          version_tag_numeric: ${{ steps.version_last.outputs.version_last_numeric }}
+          version_tag: ${{ steps.version_last.outputs.version_last }}
 
 
 
