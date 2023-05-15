@@ -17,6 +17,7 @@ jobs:
           git status
           git diff
           ls -la .
+          git tag -l
 
 ###########################################################################################
       - name: specifically set a tag of v2.0.1
@@ -37,27 +38,24 @@ jobs:
           version_tag_numeric: ${{ steps.version.outputs.version_tag_numeric }}
           version_tag: ${{ steps.version.outputs.version_tag }}
 
-##########################################################################################
-
-      - name: specifically set a tag of v2.0.1 but check that the last version is 0.0.1
-        id: version_last
+###########################################################################################
+      - name: test to see if default patch bumping from the latest git tag of 0.0.1 works
+        id: version_bumped
         run: ./version-bump.sh
         env:
-          GHA_TAG: v2.0.1
+          GHA_TAG: latest
 
-      - name: test to see if the exact tag is returned
+      - name: test if 0.0.1 is bumped to 0.0.2
         run: |
-          if [[ "$version_last_numeric" == '0.0.1' ]];then
+          if [[ "$version_tag_numeric" == '0.0.2' ]];then
             echo "winning"
           else
             exit 1
           fi
         shell: bash
         env:
-          version_last_numeric: ${{ steps.version_last.outputs.version_last_numeric }}
-          version_last: ${{ steps.version_last.outputs.version_last }}
-
-
+          version_tag_numeric: ${{ steps.version_bumped.outputs.version_tag_numeric }}
+          version_tag: ${{ steps.version_bumped.outputs.version_tag }}
 
 ###########################################################################################
       - name: test to see if default patch bumping from the latest git tag of 0.0.1 works
@@ -77,6 +75,50 @@ jobs:
         env:
           version_tag_numeric: ${{ steps.version_bumped.outputs.version_tag_numeric }}
           version_tag: ${{ steps.version_bumped.outputs.version_tag }}
+
+
+
+###########################################################################################
+
+      - name: make a feat/ branch and merge into main to trigger a minor bump
+        run: |
+          git --version
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git branch feat/merge-test
+          git switch feat/merge-test
+          touch merge-test
+          echo 'merge-test' > merge-test
+          git add merge-test
+          git commit -m "merge-test"
+          git checkout main
+          git merge feat/merge-test --no-ff --commit --no-edit
+
+          git log
+          echo "-------------------"
+          git log --merges -n 1
+
+
+      - name: bump 0.0.1 to 0.1.0 due to the feat/ merge
+        id: version_bumped_gitlog_minor
+        run: ./version-bump.sh
+        env:
+          GHA_TAG: latest
+
+      - name: test that 0.0.1 has bumped to 0.1.0
+        run: |
+          if [[ "$version_tag_numeric" == '0.1.0' ]];then
+            echo "winning"
+          else
+            exit 1
+          fi
+        shell: bash
+        env:
+          version_tag_numeric: ${{ steps.version_bumped_gitlog_minor.outputs.version_tag_numeric }}
+          version_tag: ${{ steps.version_bumped_gitlog_minor.outputs.version_tag }}
+
+
+
 
 ###########################################################################################
 
@@ -109,36 +151,4 @@ jobs:
           version_tag: ${{ steps.version_bumped_gitlog_major.outputs.version_tag }}
 
 ###########################################################################################
-
-      - name: make a feat/ branch and merge into main to trigger a minor bump
-        run: |
-          git --version
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          git branch feat/bibble
-          git switch feat/bibble
-          touch bibble
-          echo 'bibble' > bibble
-          git add bibble
-          git commit -m "Merge pull request #1932 from ORCID/feat/bibble" -m "feat/bibble"
-          git checkout main
-          git merge feat/bibble
-
-      - name: bump 0.0.1 to 0.1.0 due to the feat/ merge
-        id: version_bumped_gitlog_minor
-        run: ./version-bump.sh
-        env:
-          GHA_TAG: latest
-
-      - name: test that 0.0.1 has bumped to 0.1.0
-        run: |
-          if [[ "$version_tag_numeric" == '0.1.0' ]];then
-            echo "winning"
-          else
-            exit 1
-          fi
-        shell: bash
-        env:
-          version_tag_numeric: ${{ steps.version_bumped_gitlog_minor.outputs.version_tag_numeric }}
-          version_tag: ${{ steps.version_bumped_gitlog_minor.outputs.version_tag }}
 

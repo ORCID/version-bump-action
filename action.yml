@@ -12,7 +12,11 @@ inputs:
     required: false
     default: "patch"
     type: string
-
+  git_log_from:
+    description: 'where in the git history to look for bump commits'
+    required: false
+    default: "second_merge"
+    type: string
 
 
 outputs:
@@ -46,4 +50,4 @@ runs:
       env:
         GHA_TAG: ${{ inputs.version_tag }}
         GHA_BUMP: ${{ inputs.bump }}
-
+        GHA_GIT_LOG_FROM: ${{ inputs.git_log_from }}
