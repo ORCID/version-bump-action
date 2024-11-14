@@ -102,11 +102,23 @@ if ! version=`git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort=
 fi
 
 version_numeric="$(echo $version | tr -dc '[:digit:].')"
+if ! echo "$version" | grep -q 'v';then
+  echo "NOTE: prepending v to the version"
+  version="v${version}"
+fi
+
+
 echo "version: $version"
 echo "version_numeric: $version_numeric"
 
 # option that just returns the provided values
 if [[ "$tag" != 'latest' ]];then
+
+  if ! echo "$tag" | grep -q 'v';then
+    echo "NOTE: prepending v to the specified tag"
+   tag="v${tag}"
+  fi
+
   echo "tag specified: $tag"
 
   echo "version_last=${version}" >> "$GITHUB_OUTPUT" 2>/dev/null
