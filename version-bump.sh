@@ -175,22 +175,20 @@ fi
 # Allow git commit messages to override bump value
 # Check for #major or #minor in commit message and increment the relevant version number
 
-merge_commit=$(git log --merges -n 1)
-
+echo "----------------------------------------------"
+echo "---------- version-bump-action ---------------"
+echo "----------------------------------------------"
 echo "commits_for_bump:"
 echo "$commits_for_bump"
 echo " "
 echo "----------------------------------------------"
-echo " "
-echo "merge_commit:"
-echo "$merge_commit"
 
-if grep -qE 'feat' <<< $(echo $merge_commit);then
+if grep -qE 'feat' <<< $(echo $commits_for_bump);then
   echo "feature git commit detected"
   minor=1
 fi
 
-if grep -qE 'fix|bug|patch|test' <<< $(echo $merge_commit);then
+if grep -qE 'fix|bug|patch|test' <<< $(echo $commits_for_bump);then
   echo "fix|bug|patch|test git commit detected"
   patch=1
 fi
