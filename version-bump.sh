@@ -177,14 +177,6 @@ fi
 
 merge_commit=$(git log --merges -n 1)
 
-PR_NUMBER=$1
-PR_TEXT=$(gh pr view "$PR_NUMBER" --json body,comments -q '.body, .comments[].body')
-
-echo "**************************"
-echo "PR_TEXT:"
-echo "$PR_TEXT" 
-echo "**************************"
-
 echo "commits_for_bump:"
 echo "$commits_for_bump"
 echo " "
@@ -193,12 +185,12 @@ echo " "
 echo "merge_commit:"
 echo "$merge_commit"
 
-if grep -qE 'feat' <<< $(echo $commits_for_bump);then
+if grep -qE 'feat' <<< $(echo $merge_commit);then
   echo "feature git commit detected"
   minor=1
 fi
 
-if grep -qE 'fix|bug|patch|test' <<< $(echo $commits_for_bump);then
+if grep -qE 'fix|bug|patch|test' <<< $(echo $merge_commit);then
   echo "fix|bug|patch|test git commit detected"
   patch=1
 fi
@@ -274,4 +266,3 @@ echo "version_last_numeric=${version_numeric}" >> "$GITHUB_OUTPUT" 2>/dev/null
 
 echo "version_tag=${new_tag}" >> "$GITHUB_OUTPUT" 2>/dev/null
 echo "version_tag_numeric=${new_tag_numeric}" >> "$GITHUB_OUTPUT" 2>/dev/null
-
