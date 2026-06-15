@@ -185,12 +185,12 @@ echo " "
 echo "merge_commit:"
 echo "$merge_commit"
 
-if grep -qE 'feat' <<< $(echo $merge_commit);then
+if grep -qE 'feat' <<< $(echo $commits_for_bump);then
   echo "feature git commit detected"
   minor=1
 fi
 
-if grep -qE 'fix|bug|patch|test' <<< $(echo $merge_commit);then
+if grep -qE 'fix|bug|patch|test' <<< $(echo $commits_for_bump);then
   echo "fix|bug|patch|test git commit detected"
   patch=1
 fi
