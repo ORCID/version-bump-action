@@ -177,6 +177,14 @@ fi
 
 merge_commit=$(git log --merges -n 1)
 
+PR_NUMBER=$1
+PR_TEXT=$(gh pr view "$PR_NUMBER" --json body,comments -q '.body, .comments[].body')
+
+echo "**************************"
+echo "PR_TEXT:"
+echo "$PR_TEXT" 
+echo "**************************"
+
 echo "commits_for_bump:"
 echo "$commits_for_bump"
 echo " "
