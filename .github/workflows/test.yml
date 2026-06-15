@@ -90,7 +90,7 @@ jobs:
           echo 'merge-test' > merge-test
           git add merge-test
           git commit -m "merge-test"
-          git checkout main
+          git checkout ${{ github.event.repository.default_branch }}
           git merge feat/merge-test --no-ff --commit --no-edit
 
           git log
