@@ -82,21 +82,39 @@ jobs:
 
 ###########################################################################################
 
-      - name: bump should be patch (0.0.3) NOT minor (0.1.0) because merge bump is disabled
+      - name: make a feat/ branch and merge into main to trigger a minor bump
+        run: |
+          git --version
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git branch feat/merge-test
+          git switch feat/merge-test
+          touch merge-test
+          echo 'merge-test' > merge-test
+          git add merge-test
+          git commit -m "merge-test"
+          git checkout main
+          git merge feat/merge-test --no-ff --commit --no-edit
+
+          git log
+          echo "-------------------"
+          git log --merges -n 1
+
+      - name: bump should be (0.0.2) NOT (0.1.0) because merge bump is disabled
         id: version_no_merge_bump
         run: |
-          echo "===> bump should be patch (0.0.3) NOT minor (0.1.0) because merge bump is disabled";
+          echo "===> bump should be patch (0.0.2) NOT minor (0.1.0) because merge bump is disabled";
           ./version-bump.sh
         env:
           GHA_TAG: latest
           GHA_ENABLE_MERGE_COMMIT_BUMP: "false"
 
-      - name: test that 0.0.2 has bumped to 0.0.3 (patch) and NOT 0.1.0 (minor)
+      - name: test that 0.0.1 has bumped to 0.0.2 (patch) and NOT 0.1.0 (minor)
         run: |
-          if [[ "$version_tag_numeric" == '0.0.3' ]];then
+          if [[ "$version_tag_numeric" == '0.0.2' ]];then
             echo "winning"
           else
-            echo "Expected 0.0.3 but got $version_tag_numeric"
+            echo "Expected 0.0.2 but got $version_tag_numeric"
             exit 1
           fi
         shell: bash
