@@ -182,6 +182,7 @@ jobs:
         shell: bash
         env:
           version_tag_numeric: ${{ steps.version_no_merge_bump.outputs.version_tag_numeric }}
+          version_tag: ${{ steps.version_bumped.outputs.version_tag }}
 
 ###########################################################################################
 
