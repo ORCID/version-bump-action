@@ -87,14 +87,14 @@ jobs:
           git --version
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git branch feat/merge-test
-          git switch feat/merge-test
-          touch merge-test
-          echo 'merge-test' > merge-test
-          git add merge-test
-          git commit -m "merge-test"
+          git branch feat/merge-test-no-bump
+          git switch feat/merge-test-no-bump
+          touch merge-test-no-bump
+          echo 'merge-test-no-bump' > merge-test-no-bump
+          git add merge-test-no-bump
+          git commit -m "merge-test-no-bump"
           git checkout main
-          git merge feat/merge-test --no-ff --commit --no-edit
+          git merge feat/merge-test-no-bump --no-ff --commit --no-edit
 
           git log
           echo "-------------------"
