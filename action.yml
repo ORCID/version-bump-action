@@ -17,6 +17,11 @@ inputs:
     required: false
     default: "second_merge"
     type: string
+  enable_merge_commit_bump:
+    description: 'enable bumping based on merge commit messages'
+    required: false
+    default: "true"
+    type: string
 
 
 outputs:
@@ -51,3 +56,4 @@ runs:
         GHA_TAG: ${{ inputs.version_tag }}
         GHA_BUMP: ${{ inputs.bump }}
         GHA_GIT_LOG_FROM: ${{ inputs.git_log_from }}
+        GHA_ENABLE_MERGE_COMMIT_BUMP: ${{ inputs.enable_merge_commit_bump }}

@@ -22,6 +22,7 @@ major=0
 minor=0
 patch=0
 git_log_from=${GHA_GIT_LOG_FROM:-second_merge}
+enable_merge_commit_bump=${GHA_ENABLE_MERGE_COMMIT_BUMP:-1}
 
 #
 # functions
@@ -59,6 +60,7 @@ I_USAGE="
       -b | --bump         ) bump either none patch|minor|major or ($bump) using the a #minor #major git commit message default patch
       -l | --git_log_from ) where from the git log history to look from when considering in #minor #major messages ($git_log_from)
                             options are: numeric (number of lines) , last_tag , second_merge (github actions triggers after a merge)
+      -m | --enable_merge_commit_bump ) enable bumping based on merge commit messages ($enable_merge_commit_bump)
 "
   echo "$I_USAGE"
   exit
@@ -82,11 +84,21 @@ do
       -t | --tag       ) tag=$2 ;shift 2 ;;
       -b | --bump       ) bump=$2 ;shift 2 ;;
       -l | --git_log_from ) git_log_from=$2 ;shift 2 ;;
+      -m | --enable_merge_commit_bump ) enable_merge_commit_bump=$2 ;shift 2 ;;
       --) shift ; break ;;
       -*) echo "WARN: Unknown option (ignored): $1" >&2 ; shift ;;
       *)  break ;;
     esac
 done
+
+# handle true/false for enable_merge_commit_bump
+if [[ -z "$enable_merge_commit_bump" ]]; then
+  enable_merge_commit_bump=1
+elif [[ "$enable_merge_commit_bump" == "true" ]]; then
+  enable_merge_commit_bump=1
+elif [[ "$enable_merge_commit_bump" == "false" ]]; then
+  enable_merge_commit_bump=0
+fi
 
 # handle running locally
 GITHUB_OUTPUT=${GITHUB_OUTPUT:-/tmp/$NAME.$USER}
@@ -172,27 +184,30 @@ if [[ "$git_log_from" = 'second_merge' ]];then
   commits_for_bump=$(git log $second_merge_id..HEAD --oneline)
 fi
 
-# Allow git commit messages to override bump value
-# Check for #major or #minor in commit message and increment the relevant version number
-
-merge_commit=$(git log --merges -n 1)
-
+echo "----------------------------------------------"
 echo "commits_for_bump:"
 echo "$commits_for_bump"
 echo " "
 echo "----------------------------------------------"
-echo " "
-echo "merge_commit:"
-echo "$merge_commit"
 
-if grep -qE 'feat' <<< $(echo $merge_commit);then
-  echo "feature git commit detected"
-  minor=1
-fi
+# Allow git commit messages to override bump value
+# Check for #major or #minor in commit message and increment the relevant version number
+if [[ "$enable_merge_commit_bump" -eq 1 ]]; then
+  merge_commit=$(git log --merges -n 1)
+  echo "----------------------------------------------"
+  echo "merge_commit:"
+  echo "$merge_commit"
+  echo "----------------------------------------------"
 
-if grep -qE 'fix|bug|patch|test' <<< $(echo $merge_commit);then
-  echo "fix|bug|patch|test git commit detected"
-  patch=1
+  if grep -qE 'feat' <<< $(echo $merge_commit);then
+    echo "feature git commit detected"
+    minor=1
+  fi
+
+  if grep -qE 'fix|bug|patch|test' <<< $(echo $merge_commit);then
+    echo "fix|bug|patch|test git commit detected"
+    patch=1
+  fi
 fi
 
 if grep -q '#major' <<< $(echo $commits_for_bump) ;then
