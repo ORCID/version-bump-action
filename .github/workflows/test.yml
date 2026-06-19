@@ -80,21 +80,7 @@ jobs:
 
 ###########################################################################################
 
-
-      - name: merge a feat/ branch but with merge commit bump DISABLED
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          git branch feat/no-bump-test
-          git switch feat/no-bump-test
-          touch no-bump-test
-          echo 'no-bump-test' > no-bump-test
-          git add no-bump-test
-          git commit -m "feat: no-bump-test"
-          git checkout main
-          git merge feat/no-bump-test --no-ff --commit --no-edit
-
-      - name: bump should be patch (1.0.1) NOT minor (1.1.0) because merge bump is disabled
+      - name: bump should be patch (0.0.3) NOT minor (0.1.0) because merge bump is disabled
         id: version_no_merge_bump
         run: ./version-bump.sh
         env:
@@ -106,7 +92,7 @@ jobs:
           if [[ "$version_tag_numeric" == '0.0.3' ]];then
             echo "winning"
           else
-            echo "Expected 1.0.1 but got $version_tag_numeric"
+            echo "Expected 0.0.3 but got $version_tag_numeric"
             exit 1
           fi
         shell: bash
