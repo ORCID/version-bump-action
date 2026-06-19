@@ -61,7 +61,9 @@ jobs:
 ###########################################################################################
       - name: test to see if default patch bumping from the latest git tag of 0.0.1 works
         id: version_bumped
-        run: ./version-bump.sh
+        run: |   
+          echo "===> test to see if default patch bumping from the latest git tag of 0.0.1 works";
+          ./version-bump.sh
         env:
           GHA_TAG: latest
 
@@ -82,7 +84,9 @@ jobs:
 
       - name: bump should be patch (0.0.3) NOT minor (0.1.0) because merge bump is disabled
         id: version_no_merge_bump
-        run: ./version-bump.sh
+        run: |
+          echo "===> bump should be patch (0.0.3) NOT minor (0.1.0) because merge bump is disabled";
+          ./version-bump.sh
         env:
           GHA_TAG: latest
           GHA_ENABLE_MERGE_COMMIT_BUMP: "false"
